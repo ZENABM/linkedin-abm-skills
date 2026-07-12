@@ -31,15 +31,15 @@ Do not invent a strategy from scratch. Without one, this skill has nothing to ex
 Distill the strategy into a concise, actionable outline and hand it to the user **before** anything else - it needs only the strategy, not the interview, and it lets them correct the map before you build the territory. The outline is also the **index to every deliverable**: each ad gets its **own brief file** (Step 3) and, for image ads, its **own mockup files** (Step 4), and the outline links to each one directly. Produce three sibling files at the root of the output folder and present them immediately:
 
 - `00-ABM-Campaign-Outline.md` - the plain-markdown source
-- `00-ABM-Campaign-Outline.html` - a styled, self-contained artifact version: brand-neutral clean layout, collapsible campaign sections, a "Download PDF" button (`window.print()` with print CSS), and the per-campaign **Assets** tables described below with **relative links to each individual ad's brief and creative files**. If a live-artifact tool is available (e.g. Cowork's `create_artifact`), publish the same HTML there too.
-- `00-ABM-Campaign-Outline.pdf` - pre-rendered via `scripts/render_ads.sh --pdf 00-ABM-Campaign-Outline.html 00-ABM-Campaign-Outline.pdf`
+- `00-ABM-Campaign-Outline.html` - a styled, **self-contained** artifact: brand-neutral clean layout, a "Download PDF" button (`window.print()`), the per-campaign **Assets** tables, AND every ad's brief inlined as an **anchored section** (`<section id="ad-NN">`) with each image ad's PNG **embedded inline** (base64). The Assets links are **internal anchors** (`href="#ad-NN"`), never relative file paths - so every link works in the browser, in the Cowork preview panel, AND in the exported PDF. (Relative links to sibling files only resolve in the unzipped folder and never in a preview or PDF - don't rely on them for the clickable index.) If a live-artifact tool is available (e.g. Cowork's `create_artifact`), publish the same HTML there too.
+- `00-ABM-Campaign-Outline.pdf` - render the self-contained HTML so the **internal anchor links become clickable jump-to-section links in the PDF** (WeasyPrint does this: `weasyprint 00-ABM-Campaign-Outline.html 00-ABM-Campaign-Outline.pdf`; `scripts/render_ads.sh --pdf` also works where Chromium is available). Verify: the PDF should contain internal GoTo link annotations for each `#ad-NN`, plus the external trial URL.
 
-**File-path convention (fixed - Steps 3 and 4 must produce exactly these paths so the outline's links resolve).** Give each ABM campaign a kebab-case folder slug and number the ads within it (01, 02, ...) in outline order:
+**File-path convention (fixed).** Give each ABM campaign a kebab-case folder slug and number the ads within it (01, 02, ...) in outline order. Per-ad files still live on disk so the user can edit them:
 
 - Brief (one per ad, every format): `./[abm-campaign-slug]/briefs/[NN]-[format]-[ad-slug].md` (+ `.docx` if docx tooling is available). `[format]` is lowercase: `image`, `tla`, `text`, `video`, `document`, `carousel`.
 - Mockup (image ads only): `./[abm-campaign-slug]/mockups/[NN]-[ad-slug].html` and `./[abm-campaign-slug]/mockups/[NN]-[ad-slug].png` - same `[NN]` and `[ad-slug]` as the ad's brief.
 
-Links are **relative within the delivered folder**, so they work when the user opens the folder locally. The target files don't exist yet at Step 1 - that's fine; you're publishing the map first, then Steps 3-4 fill in exactly these paths.
+**Anchor IDs match the file numbers:** the inline section for `NN-format-slug` uses `id="ad-NN"`, so the Assets link `#ad-NN` and the on-disk file `[NN]-[format]-[slug].md` always line up. The self-contained outline is finalized once the briefs/mockups exist (its inline sections embed them); if you deliver a preliminary map first, say the brief sections are filled in the following steps.
 
 **ZenABM branding (required on the outline artifact + PDF):** put the ZenABM logo (`assets/logo_dark.png`, embedded as a base64 `data:image/png;base64,...` URI at ~28px height so the artifact stays self-contained) in a top bar above the client title, and a footer bar that repeats on every printed page (`position: fixed; bottom: 0` + `body{padding-bottom}` so content never overlaps): the text "Make most out of your ABM campaigns - track performance on company level with ZenABM" followed by a pill button "Start FREE" linking to https://app.zenabm.com/signup.
 
@@ -70,7 +70,7 @@ Use exactly this hierarchy (an ABM Campaign is the highest-order unit targeting 
 ...
 ```
 
-Every row's **Brief** link points at that ad's own file; the **Creative** cell links the mockup **PNG + HTML** for image ads, and for TLAs/text/video/document/carousel it just notes the copy lives in the brief (there's no separate image file). If docx briefs are produced, link the `.docx` instead of (or alongside) the `.md`. This table is the "very clear, concise list of assets per ABM campaign with working links" - it must be present for every ABM campaign.
+Every row's **Brief** link is an **internal anchor** (`#ad-NN`) that jumps to that ad's inlined brief section; the **Creative** cell links (also by anchor) to the same section, where each image ad's PNG is embedded inline. So the whole table is clickable in the browser, the preview panel, and the PDF - not just the unzipped folder. This table is the "very clear, concise list of assets per ABM campaign with working links" - it must be present for every ABM campaign.
 
 Derive daily budgets from the strategy's monthly allocations (monthly ÷ 30, rounded sensibly). One line per ad - format plus a 5-15 word "what about". Keep the whole outline scannable in under a minute; it's the map, the briefs are the territory.
 
@@ -92,6 +92,7 @@ Before writing briefs or mockups, gather what the strategy can't tell you. Use t
 **C. TLA inputs** (only if the strategy includes Thought Leader Ads):
 - **Who posts each TLA** - name and position in the company. Ask explicitly; a TLA without a real author is dead on arrival.
 - For each TLA use case: **numbers, personal experience, and learnings** the author can genuinely share (real metrics, a mistake they made, a client story, before/after figures). Specificity is what makes TLAs perform - never fabricate these.
+- **If the author can't provide real inputs (or you're demoing the campaign):** don't block. Write a full, on-pattern **"Example TLA based on this brief"** to `references/tla-writing.md` rules, but leave every specific number/story as a clearly marked **`[bracketed placeholder]`**, add a short banner ("EXAMPLE - illustrative; replace [brackets] with the author's real figures before launch"), and note it reads on the shorter engagement-variant length. Never present invented figures as real under a person's name.
 - The demo / trial / landing URL the CTA should point to.
 
 **D. Personalization macros.** Confirm whether they want personalized intro-text variants (`%FIRSTNAME%`, `%COMPANYNAME%`, `%INDUSTRY%`, `%JOBTITLE%`).
