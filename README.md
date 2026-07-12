@@ -62,21 +62,25 @@ signals), and clear next steps. 🗓️ Set it to arrive **automatically on the 
 
 ## ▶️ Get started
 
-Works wherever you use Claude — **Claude Code**, the **Claude desktop app (Cowork)**, or **Claude.ai** on the web.
+### Claude desktop app (Cowork) or Claude.ai — easiest
 
-**Fastest (Claude Code):** add these skills once, then just ask.
+1. **[⬇️ Download the skills](../../releases/latest)** — grab the `.zip` for each skill you want.
+2. Add it to Claude:
+   - **Cowork:** *Customize → Skills → ➕ → Upload a skill*, then pick the `.zip`.
+   - **Claude.ai (web):** add the skill under *Skills*, or upload its files to a Project.
+3. When Claude offers to connect **ZenABM**, click **Connect** to use your real LinkedIn ads data
+   (optional — the skills also work with benchmarks).
+4. Start it from any chat — e.g. `/linkedin-abm-report` — or just say what you want in plain English:
+   *"Build my monthly LinkedIn ABM report."*
+
+### Claude Code (terminal) — install all four at once
 
 ```
 /plugin marketplace add ZENABM/linkedin-abm-skills
 /plugin install linkedin-abm-skills@zenabm
 ```
 
-**Claude desktop or web:** grab this repo with the green **Code → Download ZIP** button (or `git clone`), then
-drop the skill folder you want into Claude — in **Cowork**, open the folder and click **Save skill**; on
-**Claude.ai**, add the skill's files to a Project.
-
-Then start it from any chat — e.g. `/abm-strategy-planning` — or just say what you want in plain English:
-*"Build my monthly LinkedIn ABM report."*
+Then invoke any skill (e.g. `/abm-strategy-planning`) or just ask in plain English.
 
 ## 🆓 Use your real numbers (free ZenABM trial)
 
