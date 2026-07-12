@@ -120,3 +120,28 @@ Rules:
 5. Number of **ABM campaigns** = number of distinct target audiences the user named (1 market/ICP = 1 campaign).
 
 Show the resulting per-format counts and objectives in the Campaign Structure section and in the flowchart.
+
+## Budget allocation per ad set (how much $ each format gets)
+
+Split the spend across the **click-driving** formats by ad count (equal spend per ad = delivery-safe; each ad
+clears the ~$25/day floor before you add another). **Text ads are excluded** — they run on a small separate
+set-CPC bid, so show them as `~$0` of this budget. Show **two columns**: one at the user's stated budget, one at
+the budget required to hit the goal (`monthlyBudgetReq`).
+
+```
+clickAds        = N_TLA + N_IMAGE + N_VIDEO + N_DOC          # everything except text
+shareFmt        = N_fmt / clickAds                            # per format (0 if that format has 0 ads)
+
+# Column 1 — at the user's budget:
+budgetFmtYours  = round( shareFmt * monthlyBudget )           # $/mo for that format
+pctFmt          = round( shareFmt * 100 )                     # % of spend (same in both columns)
+
+# Column 2 — at the budget needed to hit the goal:
+budgetFmtRec    = round( shareFmt * monthlyBudgetReq )        # $/mo for that format
+```
+
+Render each cell as `"$X/mo · Y%"` (text ads: `"~$0 · set-CPC"`; formats with 0 ads: `"—"`). Add a **Total
+(click-driving)** row that sums to `monthlyBudget` (col 1) and `monthlyBudgetReq` (col 2). The **% mix is the same
+in both columns** — only the dollars change; the recommended column just funds the same mix fully so the plan
+lands in ~12 months instead of stretching over `timeToRunMonths`. Note in the allocation line that at the
+recommended budget the ad-count model affords more ads, so they can also un-group TLA+image and add video/doc.
