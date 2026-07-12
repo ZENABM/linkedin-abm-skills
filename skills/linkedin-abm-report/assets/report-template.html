@@ -1,0 +1,256 @@
+<!--
+  ZenABM — "[Company] LinkedIn ABM Ad Report — [Month Year]" monthly report template (detailed edition).
+  Fill every {{PLACEHOLDER}} token. Fill {{LOGO_WHITE}} with assets/logo_white.png as a base64 data: URI.
+  Use plain ✓ / ✗ grade marks (never emoji). Build {{SPEND_PIE_SVG}} as an inline SVG donut (NOT Chart.js — it
+  won't render in the PDF). Delete the REVENUE section when no CRM — show {{CRM_PROMPT}} instead.
+  Each section should carry a short explanatory paragraph plus its data. Self-contained, light-mode, prints to PDF.
+-->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{COMPANY_NAME}} LinkedIn ABM Ad Report — {{MONTH_YEAR}}</title>
+<style>
+  :root{
+    color-scheme: light;
+    --dark:#004737; --green:#0F8A5F; --lime:#87FFC0; --beige:#F4F3ED;
+    --ink:#1E2B25; --muted:#5D7057; --line:#DDE6DD; --card:#FFFFFF;
+    --red:#B85042; --redbg:#FBEDE9; --goodbg:#dff5e7; --good:#0b6b46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--beige); color:var(--ink);
+    font-family:"Poppins","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; font-size:15px;}
+  .wrap{max-width:920px; margin:0 auto; padding:28px 22px 80px}
+  h1,h2,h3{margin:0 0 .4em; line-height:1.2; font-weight:700; color:var(--dark)}
+  h2{font-size:22px; margin-top:8px}
+  h3{font-size:16px}
+  p{margin:0 0 .8em}
+  a{color:var(--green)}
+  .small{font-size:12.5px; color:var(--muted)}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--green); margin-bottom:6px}
+
+  .bar{position:sticky; top:0; z-index:10; display:flex; justify-content:space-between; align-items:center;
+       background:var(--dark); color:#fff; padding:10px 16px; border-radius:12px; margin-bottom:22px}
+  .bar .brand{font-weight:700; letter-spacing:.02em}
+  .btn{background:var(--lime); color:var(--dark); border:none; font-weight:700; font-size:13px;
+       padding:9px 16px; border-radius:999px; cursor:pointer; font-family:inherit}
+  .btn:hover{filter:brightness(.96)}
+
+  .cover{background:var(--dark); color:#fff; border-radius:18px; padding:34px 30px; margin-bottom:26px}
+  .cover h1{color:#fff; font-size:32px; margin-bottom:.25em}
+  .cover .sub{color:#cfeede; font-size:16px; max-width:660px}
+  .metarow{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:20px; font-size:13px; color:#bfe0cf}
+  .metarow b{color:#fff; font-weight:600}
+
+  h2.sec{margin:34px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--line)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:14px 0}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
+  .card .lab{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600}
+  .card .val{font-size:24px; font-weight:700; color:var(--dark); margin-top:3px}
+  .card .note{font-size:12px; color:var(--muted); margin-top:2px}
+
+  .callout{background:#eaf5ee; border-left:4px solid var(--green); border-radius:10px; padding:12px 16px; margin:12px 0}
+  .callout.warn{background:var(--redbg); border-left-color:var(--red)}
+  .callout h3{color:var(--dark); margin-bottom:.2em}
+
+  .section{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin:16px 0}
+
+  table{width:100%; border-collapse:collapse; margin:10px 0; font-size:13px}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{background:#eef4ee; color:var(--dark); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em}
+  td.num, th.num{text-align:right}
+  .grade{font-weight:700}
+  .pass{color:var(--good)} .fail{color:var(--red)} .na{color:var(--muted)}
+  .badge{display:inline-block; border-radius:999px; padding:3px 12px; font-size:12px; font-weight:700}
+  .badge.healthy{background:var(--goodbg); color:var(--good)}
+  .badge.watch{background:#fff2d6; color:#8a6100}
+  .badge.thin{background:var(--redbg); color:var(--red)}
+  .pill{display:inline-block; background:var(--lime); color:var(--dark); border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600}
+  .up{color:var(--good); font-weight:600} .down{color:var(--red); font-weight:600}
+
+  ul{margin:.3em 0 .9em; padding-left:20px}
+  li{margin:.35em 0}
+  .flags{list-style:none; padding-left:0}
+  .flags li{padding-left:24px; position:relative; margin:.5em 0}
+  .flags.red li::before{content:"▲"; color:var(--red); font-size:12px; position:absolute; left:0; top:2px}
+  .flags.green li::before{content:"●"; color:var(--good); font-size:12px; position:absolute; left:0; top:1px}
+  /* grade marks: fill the span with ✓ (pass) or ✗ (fail) — plain glyphs render in print/PDF, no emoji font needed */
+  .fixlist{counter-reset:fix; list-style:none; padding-left:0}
+  .fixlist li{counter-increment:fix; padding:10px 12px 10px 44px; position:relative; background:#f7faf7;
+    border:1px solid var(--line); border-radius:12px; margin:.5em 0}
+  .fixlist li::before{content:counter(fix); position:absolute; left:12px; top:10px; width:22px; height:22px;
+    background:var(--green); color:#fff; border-radius:50%; text-align:center; line-height:22px; font-weight:700; font-size:13px}
+
+  .footer{background:var(--dark); color:#fff; border-radius:16px; padding:24px 26px; margin-top:30px}
+  .footer h2{color:#fff}
+  .footer a{color:var(--lime)}
+  .disclaimer{font-size:12px; color:var(--muted); margin-top:12px}
+
+  /* logo + CTA */
+  .logo{height:26px; width:auto; display:block}
+  .logo.cover-logo{height:30px; margin-bottom:16px}
+  .logo.foot-logo{height:24px; margin-bottom:14px}
+  .cta{display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:space-between;
+       background:var(--dark); color:#fff; border-radius:16px; padding:20px 24px; margin:18px 0}
+  .cta .cta-body{flex:1 1 320px; min-width:260px}
+  .cta .logo{height:22px; margin-bottom:10px}
+  .cta p{margin:0; color:#e7f3ec; font-size:14px}
+  .cta .btn-lg{background:var(--lime); color:var(--dark); border:none; font-weight:700; font-size:14px;
+       padding:12px 22px; border-radius:999px; cursor:pointer; text-decoration:none; white-space:nowrap;
+       display:inline-block; font-family:inherit}
+  .cta .btn-lg:hover{filter:brightness(.96)}
+  .footbtns{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 4px}
+  .footbtns a{background:var(--lime); color:var(--dark); font-weight:700; font-size:13px; text-decoration:none;
+       padding:10px 18px; border-radius:999px; display:inline-block}
+  .footbtns a:hover{filter:brightness(.96)}
+  .footbtns a .lab{display:block; font-size:11px; font-weight:600; color:#0b6b46; letter-spacing:.02em}
+
+  @media (max-width:640px){ .cover h1{font-size:25px} table{font-size:12px} }
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+    .wrap{max-width:none; padding:0}
+    .section,.card,.cover,.footer{break-inside:avoid}
+    h2.sec{break-after:avoid}
+  }
+</style><style>
+.toc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 20px;margin:12px 0}
+.toc ol{margin:.2em 0 0;padding-left:20px;columns:2;column-gap:32px}.toc li{margin:.28em 0;font-size:13.5px}
+.toc a{color:var(--dark);text-decoration:none}
+.pie-wrap{display:flex;gap:26px;align-items:center;flex-wrap:wrap}
+.legend{list-style:none;padding:0;margin:0;font-size:13.5px}.legend li{margin:.4em 0;display:flex;align-items:center;gap:8px}
+.legend .sw{width:14px;height:14px;border-radius:3px;display:inline-block;flex:none}
+.colist{list-style:none;padding:0;margin:.4em 0}.colist li{padding:.3em 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.chip{display:inline-block;background:var(--lime);color:var(--dark);border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:700;margin-left:6px}
+.stage{display:inline-block;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:700;color:#fff}
+</style>
+</head><body><div class="wrap">
+
+  <div class="bar no-print"><span class="brand">ZenABM · LinkedIn ABM Ad Report</span>
+    <button class="btn" onclick="window.print()">⬇ Download PDF</button></div>
+
+  <div class="cover">
+    <img class="logo cover-logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <div class="eyebrow" style="color:var(--lime)">ZenABM · Monthly Report</div>
+    <h1>{{COMPANY_NAME}} LinkedIn ABM Ad Report</h1>
+    <p class="sub">{{MONTH_YEAR}} — {{HEADLINE_SUMMARY}}</p>
+    <div class="metarow"><span><b>Reporting month:</b> {{MONTH_START}} – {{MONTH_END}}</span>
+      <span><b>Compared to:</b> {{PREV_MONTH_LABEL}}</span><span><b>Prepared:</b> {{REPORT_DATE}}</span>
+      <span><b>By:</b> Zena · ZenABM</span></div></div>
+
+  <!-- TABLE OF CONTENTS -->
+  <div class="toc"><b>In this report</b><ol>
+    <li><a href="#exec">Executive summary</a></li>
+    <li><a href="#rev">Revenue, pipeline &amp; deals</a></li>
+    <li><a href="#spend">Ad spend</a></li>
+    <li><a href="#camp">Campaign performance</a></li>
+    <li><a href="#ads">Ad performance by inventory type</a></li>
+    <li><a href="#companies">Top engaged companies</a></li>
+    <li><a href="#next">Next steps — next month</a></li>
+  </ol></div>
+
+  <!-- 1. EXECUTIVE SUMMARY -->
+  <h2 class="sec" id="exec">1 · Executive summary</h2>
+  <p class="small">{{EXEC_INTRO_PARAGRAPH}}</p>
+  <div class="grid">
+    <div class="card"><div class="lab">Pipeline generated</div><div class="val">{{PIPELINE}}</div><div class="note">{{PIPELINE_DELTA}} vs {{PREV_MONTH_SHORT}}</div></div>
+    <div class="card"><div class="lab">Deals open / influenced</div><div class="val">{{DEALS_OPEN}}</div><div class="note">{{DEALS_INFLUENCED}}</div></div>
+    <div class="card"><div class="lab">Total spend</div><div class="val">{{SPEND}}</div><div class="note">{{SPEND_DELTA}} vs {{PREV_MONTH_SHORT}}</div></div>
+  </div>
+  <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="section"><h3 style="color:var(--green)">Top campaigns</h3><p class="small"><b>Top ABM campaign:</b> {{TOP_ABM_CAMPAIGN}}<br><b>Top LinkedIn campaign:</b> {{TOP_LI_CAMPAIGN}}</p></div>
+    <div class="section"><h3 style="color:var(--green)">Top ad formats</h3><p class="small">{{TOP_FORMATS}}</p></div>
+  </div>
+  <div class="section"><h3>Spend per ad format</h3>
+    <table><thead><tr><th>Format</th><th class="num">Spend</th><th class="num">% of spend</th><th class="num">Clicks</th><th class="num">CPC</th></tr></thead><tbody>{{SPEND_PER_FORMAT_ROWS}}</tbody></table></div>
+  <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="section"><h3 style="color:var(--green)">Top performing ads</h3><p class="small">{{TOP_ADS}}</p></div>
+    <div class="section"><h3 style="color:var(--green)">Top engaged companies</h3>{{TOP_COMPANIES_BULLETS}}<p class="small">Full list in section 6.</p></div>
+  </div>
+  <div class="callout"><h3>The month in a nutshell &amp; recommendations</h3>
+    <p class="small">{{GENERAL_SUMMARY}}</p>
+    <p class="small"><b>vs {{PREV_MONTH_SHORT}}:</b> {{MOM_COMPARISON}}</p>
+    <p class="small"><b>Recommendations:</b> {{EXEC_RECOMMENDATIONS}}</p></div>
+
+  <!-- CTA A -->
+  <div class="cta"><div class="cta-body"><img class="logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <p>Get more insights on your LinkedIn ads &amp; ABM campaign performance from your ZenABM trial.</p></div>
+    <a class="btn-lg" href="http://app.zenabm.com/">Explore your free trial →</a></div>
+
+  <!-- 2. REVENUE (delete whole block if no CRM; show {CRM_PROMPT} instead) -->
+  <h2 class="sec" id="rev">2 · Revenue, pipeline &amp; deals</h2>
+  <p class="small">{{REVENUE_INTRO}}</p>
+  <div class="section">
+    <div class="grid">
+      <div class="card"><div class="lab">Influenced closed-won</div><div class="val">{{DEALS_WON_VALUE}}</div><div class="note">{{DEALS_WON}} deals</div></div>
+      <div class="card"><div class="lab">New open pipeline</div><div class="val">{{OPEN_PIPELINE}}</div><div class="note">production · test opps excluded</div></div>
+      <div class="card"><div class="lab">Pipeline / $ spent</div><div class="val">{{PIPELINE_PER_DOLLAR}}</div><div class="note">ROAS {{ROAS}}</div></div>
+    </div>
+    <table><thead><tr><th>Deal</th><th>Company</th><th class="num">Amount</th><th>Stage</th><th>Influenced by</th></tr></thead><tbody>{{DEALS_ROWS}}</tbody></table>
+    <p class="small">{{DEALS_NOTE}}</p></div>
+
+  <!-- 3. AD SPEND -->
+  <h2 class="sec" id="spend">3 · Ad spend</h2>
+  <p class="small">Where the spend went this month, by ad format.</p>
+  <div class="section"><div class="pie-wrap">{{SPEND_PIE_SVG}}<div>{{SPEND_LEGEND}}
+    <p class="small" style="margin-top:10px;max-width:420px"><b>Was this a good allocation?</b> {{ALLOCATION_VERDICT}}</p></div></div></div>
+  <div class="callout warn"><h3>Re-allocation recommendation</h3><p class="small">{{REALLOCATION_RECO}}</p></div>
+
+  <!-- 4. CAMPAIGN PERFORMANCE -->
+  <h2 class="sec" id="camp">4 · Campaign performance</h2>
+  <p class="small">{{CAMPAIGN_INTRO}}</p>
+  <div class="section">
+    <table><thead><tr><th>Campaign</th><th class="num">Impr.</th><th class="num">Clicks</th><th class="num">Eng.</th><th class="num">Spend</th><th class="num">CTR</th><th class="num">CPC</th><th class="num">Note</th></tr></thead><tbody>{{CAMPAIGN_ROWS}}</tbody></table>
+    <p class="small"><b>Best:</b> {{BEST_CAMPAIGN}} · <b>Worst:</b> {{WORST_CAMPAIGN}} · <b>Best campaign type:</b> {{BEST_CAMPAIGN_TYPE}}</p></div>
+
+  <!-- 5. AD PERFORMANCE -->
+  <h2 class="sec" id="ads">5 · Ad performance by inventory type</h2>
+  <p class="small">Each inventory type this month vs the ZenABM 2026 B2B SaaS benchmark. Link-driving formats (Single Image, Carousel, Video) are graded on <b>effective CPC to landing-page click</b>, not raw CPC. ✓ = at/above benchmark, ✗ = below.</p>
+  <div class="section">
+    <h3>{{MONTH_SHORT}} actuals vs benchmark</h3>
+    <table><thead><tr><th>Inventory type</th><th class="num">Spend</th><th class="num">CTR</th><th class="num">Raw CPC</th><th class="num">Eff. CTR→LP</th><th class="num">Eff. CPC→LP</th><th class="num">CPM</th></tr></thead><tbody>{{AD_FORMAT_ROWS}}</tbody></table>
+    <p class="small">{{AD_PERFORMANCE_NOTE}}</p>
+    <h3 style="margin-top:18px">ZenABM benchmark reference (all formats)</h3>
+    <table><thead><tr><th>LinkedIn ad format</th><th class="num">CTR</th><th class="num">CPC</th><th class="num">Eff. CTR→LP</th><th class="num">Eff. CPC→LP</th><th class="num">CPM</th><th class="num">Dwell</th></tr></thead><tbody>
+      <tr><td>Thought Leader Ads</td><td class="num">2.68%</td><td class="num">$2.29</td><td class="num">0.29%</td><td class="num">$3.06</td><td class="num">$49.37</td><td class="num">6.63s</td></tr>
+      <tr><td>Single Image Ads</td><td class="num">0.42%</td><td class="num">$13.23</td><td class="num">0.42%</td><td class="num">$13.23</td><td class="num">$59.15</td><td class="num">3.64s</td></tr>
+      <tr><td>Lead Gen Form Ads</td><td class="num">0.45%</td><td class="num">$12.33</td><td class="num">0.00%</td><td class="num">N/A · $811 / lead</td><td class="num">$75.59</td><td class="num">3.18s</td></tr>
+      <tr><td>Carousel Ads</td><td class="num">0.32%</td><td class="num">$13.30</td><td class="num">0.31%</td><td class="num">$13.30</td><td class="num">$45.28</td><td class="num">4.56s</td></tr>
+      <tr><td>Document Ads</td><td class="num">0.30%</td><td class="num">$12.05</td><td class="num">0.00%</td><td class="num">N/A</td><td class="num">$72.02</td><td class="num">3.15s</td></tr>
+      <tr><td>Video Ads</td><td class="num">0.24%</td><td class="num">$15.61</td><td class="num">0.24%</td><td class="num">$15.61</td><td class="num">$38.94</td><td class="num">3.91s</td></tr>
+    </tbody></table>
+    <p class="small"><b>Best ads:</b> {{BEST_ADS}}<br><b>Needs attention:</b> {{WORST_ADS}}</p></div>
+
+  <!-- 6. TOP ENGAGED COMPANIES -->
+  <h2 class="sec" id="companies">6 · Top engaged companies</h2>
+  <p class="small">The accounts engaging most with your ads this month — the warm accounts to prioritize, and (where they cross the click threshold) to route to sales now.</p>
+  <div class="section"><h3>Top 15 by engagement</h3>
+    <table><thead><tr><th>Company</th><th class="num">Impr.</th><th class="num">Clicks</th><th class="num">Eng.</th><th>ABM stage</th></tr></thead><tbody>{{TOP15_ROWS}}</tbody></table></div>
+  <div class="section"><h3 style="color:var(--green)">Companies with 3+ clicks — likely "Interested"</h3>
+    <p class="small">Three or more clicks in a single month is a strong buying signal. These accounts are the best candidates to move to an "Interested" ABM stage and hand to sales:</p>
+    <ul class="colist" style="columns:2;column-gap:30px">{{CLICK3_LIST}}</ul></div>
+  <div class="cta"><div class="cta-body"><img class="logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <p><b>Set your ABM stage to see which companies are "Interested" directly in your CRM.</b> ZenABM scores every account and syncs the stage to HubSpot/Salesforce, so your BDRs act on intent the moment it happens.</p></div>
+    <a class="btn-lg" href="http://app.zenabm.com/">Set up ABM stages →</a></div>
+
+  <!-- 7. NEXT STEPS -->
+  <h2 class="sec" id="next">7 · Next steps — to implement next month</h2>
+  <div class="section"><ol class="fixlist">{{NEXT_STEPS}}</ol></div>
+
+  <!-- CTA B -->
+  <div class="cta"><div class="cta-body"><img class="logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <p>See the full list of companies engaging with your ads — plus a timeline of their engagements across every channel (organic, AI referrals, Google Ads, Reddit and more) — in your FREE ZenABM trial.</p></div>
+    <a class="btn-lg" href="http://app.zenabm.com/">See engaging companies →</a></div>
+
+  <div class="footer">
+    <img class="logo foot-logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <h2>Get this report automatically every month</h2>
+    <p>ZenABM builds this report continuously — pipeline and deal influence, per-format benchmarks, campaign trends and account engagement, with CRM sync so ad engagement lands on the company record for your BDRs.</p>
+    <div class="footbtns">
+      <a href="http://app.zenabm.com/"><span class="lab">Start free</span>app.zenabm.com</a>
+      <a href="https://app.zenabm.com/data/crm-sync"><span class="lab">CRM sync</span>app.zenabm.com/data/crm-sync</a>
+      <a href="https://zenabm.com/book-a-demo"><span class="lab">Book a demo</span>zenabm.com/book-a-demo</a>
+    </div>
+    <p class="disclaimer">Figures reflect ZenABM's connected LinkedIn ads data for {{MONTH_YEAR}} vs {{PREV_MONTH_LABEL}}. Benchmarks are B2B SaaS medians from ZenABM's 2026 report and are directional guidance, not guarantees.</p></div>
+
+</div></body></html>

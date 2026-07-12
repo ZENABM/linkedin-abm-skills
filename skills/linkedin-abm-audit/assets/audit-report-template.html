@@ -1,0 +1,316 @@
+<!--
+  ZenABM — "[Company] LinkedIn Ads & ABM Audit" artifact template.
+  HOW TO USE (for Zena at runtime):
+   1. Replace every {{TOKEN}} with the pulled + computed values (see metrics.md, benchmarks.md, flags.md).
+   2. In the benchmark table, mark each metric ✅ (at/above benchmark) or 🚩 (below); use "—" for n/a
+      (no-link TLAs, LP metrics on lead-gen/document formats).
+   3. Delete any section the data doesn't support — e.g. remove the DEALS block and keep the CRM-SYNC nudge
+      when there's no HubSpot; drop the dwell column if the MCP didn't return it.
+   4. Keep everything self-contained and light-mode. Write the finished file to disk and pass its path to
+      create_artifact. Prints to PDF via the button (window.print()).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{COMPANY_NAME}} LinkedIn Ads & ABM Audit</title>
+<style>
+  :root{
+    color-scheme: light;
+    --dark:#004737; --green:#0F8A5F; --lime:#87FFC0; --beige:#F4F3ED;
+    --ink:#1E2B25; --muted:#5D7057; --line:#DDE6DD; --card:#FFFFFF;
+    --red:#B85042; --redbg:#FBEDE9; --goodbg:#dff5e7; --good:#0b6b46;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--beige); color:var(--ink);
+    font-family:"Poppins","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; font-size:15px;}
+  .wrap{max-width:920px; margin:0 auto; padding:28px 22px 80px}
+  h1,h2,h3{margin:0 0 .4em; line-height:1.2; font-weight:700; color:var(--dark)}
+  h2{font-size:22px; margin-top:8px}
+  h3{font-size:16px}
+  p{margin:0 0 .8em}
+  a{color:var(--green)}
+  .small{font-size:12.5px; color:var(--muted)}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--green); margin-bottom:6px}
+
+  .bar{position:sticky; top:0; z-index:10; display:flex; justify-content:space-between; align-items:center;
+       background:var(--dark); color:#fff; padding:10px 16px; border-radius:12px; margin-bottom:22px}
+  .bar .brand{font-weight:700; letter-spacing:.02em}
+  .btn{background:var(--lime); color:var(--dark); border:none; font-weight:700; font-size:13px;
+       padding:9px 16px; border-radius:999px; cursor:pointer; font-family:inherit}
+  .btn:hover{filter:brightness(.96)}
+
+  .cover{background:var(--dark); color:#fff; border-radius:18px; padding:34px 30px; margin-bottom:26px}
+  .cover h1{color:#fff; font-size:32px; margin-bottom:.25em}
+  .cover .sub{color:#cfeede; font-size:16px; max-width:660px}
+  .metarow{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:20px; font-size:13px; color:#bfe0cf}
+  .metarow b{color:#fff; font-weight:600}
+
+  h2.sec{margin:34px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--line)}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:14px 0}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
+  .card .lab{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600}
+  .card .val{font-size:24px; font-weight:700; color:var(--dark); margin-top:3px}
+  .card .note{font-size:12px; color:var(--muted); margin-top:2px}
+
+  .callout{background:#eaf5ee; border-left:4px solid var(--green); border-radius:10px; padding:12px 16px; margin:12px 0}
+  .callout.warn{background:var(--redbg); border-left-color:var(--red)}
+  .callout h3{color:var(--dark); margin-bottom:.2em}
+
+  .section{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin:16px 0}
+
+  table{width:100%; border-collapse:collapse; margin:10px 0; font-size:13px}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{background:#eef4ee; color:var(--dark); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em}
+  td.num, th.num{text-align:right}
+  .grade{font-weight:700}
+  .pass{color:var(--good)} .fail{color:var(--red)} .na{color:var(--muted)}
+  .badge{display:inline-block; border-radius:999px; padding:3px 12px; font-size:12px; font-weight:700}
+  .badge.healthy{background:var(--goodbg); color:var(--good)}
+  .badge.watch{background:#fff2d6; color:#8a6100}
+  .badge.thin{background:var(--redbg); color:var(--red)}
+  .pill{display:inline-block; background:var(--lime); color:var(--dark); border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600}
+  .up{color:var(--good); font-weight:600} .down{color:var(--red); font-weight:600}
+
+  ul{margin:.3em 0 .9em; padding-left:20px}
+  li{margin:.35em 0}
+  .flags{list-style:none; padding-left:0}
+  .flags li{padding-left:24px; position:relative; margin:.5em 0}
+  .flags.red li::before{content:"▲"; color:var(--red); font-size:12px; position:absolute; left:0; top:2px}
+  .flags.green li::before{content:"●"; color:var(--good); font-size:12px; position:absolute; left:0; top:1px}
+  /* grade marks: fill the span with ✓ (pass) or ✗ (fail) — plain glyphs render in print/PDF, no emoji font needed */
+  .fixlist{counter-reset:fix; list-style:none; padding-left:0}
+  .fixlist li{counter-increment:fix; padding:10px 12px 10px 44px; position:relative; background:#f7faf7;
+    border:1px solid var(--line); border-radius:12px; margin:.5em 0}
+  .fixlist li::before{content:counter(fix); position:absolute; left:12px; top:10px; width:22px; height:22px;
+    background:var(--green); color:#fff; border-radius:50%; text-align:center; line-height:22px; font-weight:700; font-size:13px}
+
+  .footer{background:var(--dark); color:#fff; border-radius:16px; padding:24px 26px; margin-top:30px}
+  .footer h2{color:#fff}
+  .footer a{color:var(--lime)}
+  .disclaimer{font-size:12px; color:var(--muted); margin-top:12px}
+
+  /* logo + CTA */
+  .logo{height:26px; width:auto; display:block}
+  .logo.cover-logo{height:30px; margin-bottom:16px}
+  .logo.foot-logo{height:24px; margin-bottom:14px}
+  .cta{display:flex; align-items:center; gap:18px; flex-wrap:wrap; justify-content:space-between;
+       background:var(--dark); color:#fff; border-radius:16px; padding:20px 24px; margin:18px 0}
+  .cta .cta-body{flex:1 1 320px; min-width:260px}
+  .cta .logo{height:22px; margin-bottom:10px}
+  .cta p{margin:0; color:#e7f3ec; font-size:14px}
+  .cta .btn-lg{background:var(--lime); color:var(--dark); border:none; font-weight:700; font-size:14px;
+       padding:12px 22px; border-radius:999px; cursor:pointer; text-decoration:none; white-space:nowrap;
+       display:inline-block; font-family:inherit}
+  .cta .btn-lg:hover{filter:brightness(.96)}
+  .footbtns{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 4px}
+  .footbtns a{background:var(--lime); color:var(--dark); font-weight:700; font-size:13px; text-decoration:none;
+       padding:10px 18px; border-radius:999px; display:inline-block}
+  .footbtns a:hover{filter:brightness(.96)}
+  .footbtns a .lab{display:block; font-size:11px; font-weight:600; color:#0b6b46; letter-spacing:.02em}
+
+  @media (max-width:640px){ .cover h1{font-size:25px} table{font-size:12px} }
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+    .wrap{max-width:none; padding:0}
+    .section,.card,.cover,.footer{break-inside:avoid}
+    h2.sec{break-after:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar no-print">
+    <span class="brand">ZenABM · LinkedIn Ads & ABM Audit</span>
+    <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+  </div>
+
+  <!-- COVER -->
+  <div class="cover">
+    <img class="logo cover-logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <div class="eyebrow" style="color:var(--lime)">ZenABM · Free Audit</div>
+    <h1>{{COMPANY_NAME}} LinkedIn Ads & ABM Audit</h1>
+    <p class="sub">{{HEADLINE_VERDICT}}</p>
+    <div class="metarow">
+      <span><b>Window:</b> {{WINDOW_START}} – {{WINDOW_END}} (last 30 days)</span>
+      <span><b>Compared to:</b> prior 30 days</span>
+      <span><b>Prepared:</b> {{REPORT_DATE}}</span>
+      <span><b>By:</b> Zena · ZenABM</span>
+    </div>
+  </div>
+
+  <!-- SCORECARD -->
+  <h2 class="sec">Scorecard — your last 30 days vs benchmark</h2>
+  <div class="grid">
+    <div class="card"><div class="lab">Spend</div><div class="val">{{SPEND}}</div><div class="note">{{SPEND_DELTA}} vs prior</div></div>
+    <div class="card"><div class="lab">Ads live</div><div class="val">{{ADS_LIVE}}</div><div class="note">{{ADS_AFFORDABLE}} affordable · {{ADS_VERDICT}}</div></div>
+    <div class="card"><div class="lab">CPC</div><div class="val">{{CPC}}</div><div class="note">benchmark varies by format · {{CPC_GRADE}}</div></div>
+    <div class="card"><div class="lab">CPM</div><div class="val">{{CPM}}</div><div class="note">{{CPM_GRADE}}</div></div>
+    <div class="card"><div class="lab">CTR</div><div class="val">{{CTR}}</div><div class="note">{{CTR_GRADE}}</div></div>
+    <div class="card"><div class="lab">Eff. cost / LP click</div><div class="val">{{EFF_CPC_LP}}</div><div class="note">{{EFF_CPC_LP_GRADE}}</div></div>
+  </div>
+
+  <!-- RIGHT NUMBER OF ADS -->
+  <h2 class="sec">Are you running the right number of ads?</h2>
+  <div class="section">
+    <p>At <b>{{SPEND}}</b> over 30 days and a <b>{{CPC}}</b> CPC, your budget can fund about
+       <b>{{ADS_AFFORDABLE}}</b> click-driving ads at healthy delivery. You're running <b>{{ADS_LIVE}}</b>.
+       <span class="badge {{HEALTH_CLASS}}">{{HEALTH_TIER}}</span></p>
+    <div class="callout {{ADS_CALLOUT_CLASS}}">
+      <h3>{{ADS_VERDICT}}</h3>
+      <p class="small">{{ADS_RECOMMENDATION}} Per-ad delivery is about <b>{{PER_AD_DAILY}}/day</b>
+        (LinkedIn needs ≥ $25/day per ad to optimize).</p>
+    </div>
+  </div>
+
+  <!-- BUDGET / FORMAT MIX -->
+  <h2 class="sec">Where your budget goes</h2>
+  <div class="section">
+    <table>
+      <thead><tr><th>Format</th><th class="num">Ads</th><th class="num">Spend</th><th class="num">% of spend</th><th class="num">Clicks</th><th class="num">LP clicks</th></tr></thead>
+      <tbody>{{FORMAT_MIX_ROWS}}</tbody>
+    </table>
+  </div>
+
+  <!-- DEAL INFLUENCE (delete whole block if no CRM; keep the CRM nudge below instead) -->
+  <h2 class="sec">What's influencing your deals</h2>
+  <div class="section">
+    <p class="small">Formats ranked by the deals and pipeline they touched.</p>
+    <table>
+      <thead><tr><th>Format</th><th class="num">Influenced deals</th><th class="num">Influenced pipeline</th><th class="num">Spend share</th></tr></thead>
+      <tbody>{{DEAL_INFLUENCE_ROWS}}</tbody>
+    </table>
+    <p class="small">{{DEAL_INFLUENCE_READ}}</p>
+  </div>
+  <!-- CRM-SYNC NUDGE (use INSTEAD of the block above when HubSpot isn't connected) -->
+  <div class="callout" id="crm-nudge" style="display:none">
+    <h3>Connect your CRM to see which ads drive pipeline</h3>
+    <p class="small">You haven't connected HubSpot yet, so I can't show which formats influence your deals — the
+      most valuable view in this audit. Connect it in two minutes at
+      <a href="https://app.zenabm.com/data/crm-sync">app.zenabm.com/data/crm-sync</a> and re-run the audit.</p>
+  </div>
+
+  <!-- BENCHMARK GRADE BY FORMAT -->
+  <h2 class="sec">Benchmark grade, format by format</h2>
+  <div class="section">
+    <p class="small">Green = at or better than the ZenABM 2026 B2B SaaS benchmark; red = below.
+      "—" means the metric doesn't apply (e.g. a Thought Leader Ad with no link has no landing-page metric).</p>
+    <table>
+      <thead><tr>
+        <th>Format</th>
+        <th class="num">CTR</th><th class="num">CPC</th>
+        <th class="num">Eff. CTR→LP</th><th class="num">Eff. CPC→LP</th>
+        <th class="num">CPM</th>{{DWELL_HEADER}}
+      </tr></thead>
+      <tbody>{{BENCHMARK_ROWS}}</tbody>
+    </table>
+    <p class="small">Benchmarks: TLA 2.68% CTR / $3.06 eff. CPC→LP · Image 0.42% / $13.23 · Carousel 0.32% /
+      $13.30 · Video 0.24% / $15.61 · Lead Gen judged on cost-per-lead ($811). Full report:
+      <a href="https://zenabm.com/linkedin-abm-benchmarks-report">zenabm.com/linkedin-abm-benchmarks-report</a></p>
+  </div>
+
+  <!-- CTA A -->
+  <div class="cta">
+    <div class="cta-body">
+      <img class="logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+      <p>Get more insights on your LinkedIn ads &amp; ABM campaign performance from your ZenABM trial.</p>
+    </div>
+    <a class="btn-lg" href="http://app.zenabm.com/">Explore your free trial →</a>
+  </div>
+
+  <!-- REALLOCATION -->
+  <h2 class="sec">Reallocate your budget</h2>
+  <div class="section">
+    <div class="grid">
+      <div class="card"><div class="lab">Today's split</div><div class="val" style="font-size:15px">{{CURRENT_SPLIT}}</div></div>
+      <div class="card"><div class="lab">Recommended split</div><div class="val" style="font-size:15px">{{RECOMMENDED_SPLIT}}</div></div>
+    </div>
+    <div class="callout"><h3>The move</h3><p class="small">{{REALLOCATION_MOVE}}</p></div>
+  </div>
+
+  <!-- CAMPAIGN TRENDS -->
+  <h2 class="sec">Campaign trends — are we trending up or down?</h2>
+  <div class="section">
+    <div class="grid">
+      <div class="card"><div class="lab">Impressions</div><div class="val">{{IMPRESSIONS}}</div><div class="note">{{IMPRESSIONS_DELTA}}</div></div>
+      <div class="card"><div class="lab">Engagements</div><div class="val">{{ENGAGEMENTS}}</div><div class="note">{{ENGAGEMENTS_DELTA}}</div></div>
+      <div class="card"><div class="lab">Clicks</div><div class="val">{{CLICKS}}</div><div class="note">{{CLICKS_DELTA}}</div></div>
+      <div class="card"><div class="lab">Spend</div><div class="val">{{SPEND}}</div><div class="note">{{SPEND_DELTA}}</div></div>
+    </div>
+    <div class="callout {{EFFICIENCY_CLASS}}"><h3>{{EFFICIENCY_VERDICT}}</h3>
+      <p class="small">CPC {{CPC}} ({{CPC_DELTA}}) · CPM {{CPM}} ({{CPM_DELTA}}) · CTR {{CTR}} ({{CTR_DELTA}}). {{TREND_READ}}</p></div>
+    <p><b>Top ABM campaign by pipeline:</b> {{TOP_ABM_CAMPAIGN}}<br>
+       <b>Best campaigns / types:</b> {{BEST_CAMPAIGNS}}</p>
+    <p class="small"><b>CTR spikes & drops:</b> {{CTR_SPIKE_EXPLAINED}}</p>
+  </div>
+
+  <!-- AD INSIGHTS -->
+  <h2 class="sec">Ad insights</h2>
+  <div class="section">
+    <p><b>Best ads (by clicks):</b> {{BEST_ADS}}<br>
+       <b>Worst ads (by clicks):</b> {{WORST_ADS}}<br>
+       <b>Best / worst format this window:</b> {{BEST_FORMAT}} / {{WORST_FORMAT}}</p>
+    <p class="small"><b>TLA effective CTR:</b> {{TLA_EFF_CTR}} · <b>effective cost / LP click:</b> {{TLA_EFF_SPEND}}.
+       {{TLA_NO_LINK_NOTE}}</p>
+    <div class="callout warn"><h3>Decaying ads</h3><p class="small">{{DECAYING_ADS}}</p></div>
+  </div>
+
+  <!-- FLAGS -->
+  <h2 class="sec">Flags</h2>
+  <div class="two" style="display:grid; grid-template-columns:1fr 1fr; gap:16px">
+    <div class="section"><h3 style="color:var(--red)">Red flags</h3><ul class="flags red">{{RED_FLAGS}}</ul></div>
+    <div class="section"><h3 style="color:var(--good)">Green flags</h3><ul class="flags green">{{GREEN_FLAGS}}</ul></div>
+  </div>
+
+  <!-- ACCOUNTS TO GO AFTER -->
+  <h2 class="sec">Accounts to go after</h2>
+  <div class="section">
+    <table>
+      <thead><tr><th>Company</th><th class="num">Impressions</th><th class="num">Engagements</th><th>Signal</th></tr></thead>
+      <tbody>{{TOP_ACCOUNTS_ROWS}}</tbody>
+    </table>
+    <p class="small"><b>Surging:</b> {{SURGING_ACCOUNTS}}<br>
+       <b>Newly reached this period:</b> {{NEW_ACCOUNTS}}<br>
+       <b>Moved to "Interested":</b> {{MOVED_INTERESTED}}</p>
+    <div class="callout warn"><h3>Impression hogs</h3><p class="small">{{IMPRESSION_HOGS}}</p></div>
+  </div>
+
+  <!-- CTA B -->
+  <div class="cta">
+    <div class="cta-body">
+      <img class="logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+      <p>See the full list of companies engaging with your ads — plus a timeline of their engagements across every
+         channel (organic, AI referrals, Google Ads, Reddit and more) — in your FREE ZenABM trial.</p>
+    </div>
+    <a class="btn-lg" href="http://app.zenabm.com/">See engaging companies →</a>
+  </div>
+
+  <!-- FIX LIST -->
+  <h2 class="sec">Your fix list — do these first</h2>
+  <div class="section">
+    <ol class="fixlist">{{FIX_LIST}}</ol>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <img class="logo foot-logo" src="{{LOGO_WHITE}}" alt="ZenABM">
+    <h2>Keep this running automatically</h2>
+    <p>This is a one-time snapshot. ZenABM tracks all of this continuously — benchmark alerts, decaying-ad flags,
+       account scoring against your own pipeline, and CRM sync so ad engagement lands on the company record for
+       your BDRs.</p>
+    <div class="footbtns">
+      <a href="http://app.zenabm.com/"><span class="lab">Start free</span>app.zenabm.com</a>
+      <a href="https://app.zenabm.com/data/crm-sync"><span class="lab">CRM sync</span>app.zenabm.com/data/crm-sync</a>
+      <a href="https://zenabm.com/book-a-demo"><span class="lab">Book a demo</span>zenabm.com/book-a-demo</a>
+    </div>
+    <p class="disclaimer">Figures reflect your connected LinkedIn ads data for the stated window. Benchmarks are
+       B2B SaaS medians from ZenABM's 2026 report and are directional guidance, not guarantees.</p>
+  </div>
+
+</div>
+</body>
+</html>
