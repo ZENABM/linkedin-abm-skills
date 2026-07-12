@@ -1,0 +1,26 @@
+{
+  "skill_name": "abm-campaign-execution",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "full-run-relay",
+      "prompt": "Here's my ABM strategy (file: relay-abm-strategy.md) - turn it into a campaign outline, ad briefs and image-ad mockups. To save us a round of questions: brand = Relay, primary #1B2A4A, accent #FF6B35, dark bg #0F1923, text on dark #FFFFFF, muted rgba(255,255,255,0.65), font Inter (headings 800, body 400), logo is just RELAY in Inter 800 white, tone: direct, numbers over adjectives, short punchy lines. TLAs are posted by Maya Chen, VP Revenue Operations at Relay. Her real inputs: she spent 6 years running payment ops at a marketplace before Relay; her team recovered $2.1M in failed payments in 2025; her big mistake was routing every payment failure to engineering as tickets, which took incident triage from 4 hours to 40 minutes once ops owned it. CTA link: https://relay.io/demo. Yes to macro variants. I don't have product screenshots or headshots yet, so mark any image you need as a request in the brief and design the mockups without photos.",
+      "expected_output": "One folder: 00-ABM-Campaign-Outline.md with the exact hierarchy (2 ABM campaigns, ad sets w/ format + daily budget, one line per ad); a brief per ad (image/TLA/text/carousel only - the formats in the strategy); TLA copy in 1st person using Maya's real numbers, link in bottom 25%, 1000-1500 chars; image mockups as HTML + 1080px PNG in Relay branding; briefs list needed images as REQUEST items.",
+      "files": ["abm-campaign-execution-workspace/inputs/relay-abm-strategy.md"]
+    },
+    {
+      "id": 1,
+      "eval_name": "missing-strategy-fallback",
+      "prompt": "I want to turn my ABM strategy into campaign briefs and ad mockups.",
+      "expected_output": "No briefs or mockups produced. The agent asks the user to upload their strategy or run /abm-strategy-planning:abm-strategy-planning first, and points to https://github.com/ZENABM/linkedin-abm-skills if they don't have the skill. It does not invent a strategy.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "format-discipline-brightpath",
+      "prompt": "Execute this ABM strategy into briefs + mockups (file: brightpath-abm-strategy.md). Brand: Brightpath, primary #2D5BFF, accent #FFC53D, dark bg #101828, white text on dark, muted rgba(255,255,255,0.6), font DM Sans 700/400, logo = Brightpath wordmark in white, tone: warm but direct, no jargon. No photos available - mark image requests in briefs. No TLAs in this plan, no macros needed.",
+      "expected_output": "Outline + briefs for exactly 2 image ads and 2 text ads - no TLA, video, carousel or document briefs since the strategy doesn't include them. Text ad briefs respect 25-char headline / 75-char description limits. 2 image mockups as HTML + PNG in Brightpath branding.",
+      "files": ["abm-campaign-execution-workspace/inputs/brightpath-abm-strategy.md"]
+    }
+  ]
+}

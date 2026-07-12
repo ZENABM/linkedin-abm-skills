@@ -1,0 +1,26 @@
+{
+  "name": "zenabm",
+  "owner": {
+    "name": "ZenABM"
+  },
+  "description": "ZenABM's LinkedIn ABM skills for Claude — plan, design, audit and report on account-based marketing.",
+  "plugins": [
+    {
+      "name": "linkedin-abm-skills",
+      "source": "./",
+      "description": "Four ZenABM skills in one plugin: ABM strategy planning, ad design, live-ads audit and monthly reporting for LinkedIn.",
+      "version": "1.0.0",
+      "author": {
+        "name": "ZenABM"
+      },
+      "homepage": "https://zenabm.com",
+      "license": "MIT",
+      "keywords": [
+        "abm",
+        "linkedin ads",
+        "b2b marketing",
+        "zenabm"
+      ]
+    }
+  ]
+}

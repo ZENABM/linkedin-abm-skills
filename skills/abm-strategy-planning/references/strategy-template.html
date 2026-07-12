@@ -1,0 +1,291 @@
+<!--
+  ZenABM — "[Company] LinkedIn ABM Strategy" artifact template.
+  HOW TO USE (for Claude at runtime):
+   1. Replace every {{TOKEN}} with researched/computed values (see formulas.md & best-practices.md).
+   2. Duplicate the block between <!-- CAMPAIGN:START --> and <!-- CAMPAIGN:END --> once per target audience,
+      bumping the number/name. Delete the comments.
+   3. Fill the Mermaid graph in each campaign's flowchart with its allocated ad sets & counts.
+   4. Keep the shared sections (best practices, launch, tracking, checklist) once, after the campaign blocks.
+   5. Write the finished file to disk and pass its path to create_artifact.
+  Self-contained, light-mode, prints to PDF via the button (window.print()).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{COMPANY_NAME}} LinkedIn ABM Strategy</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.min.js" integrity="sha384-yQ4mmBBT+vhTAwjFH0toJXNYJ6O4usWnt6EPIdWwrRvx2V/n5lXuDZQwQFeSFydF" crossorigin="anonymous"></script>
+<style>
+  :root{
+    color-scheme: light;
+    --dark:#004737; --green:#0F8A5F; --lime:#87FFC0; --beige:#F4F3ED;
+    --ink:#1E2B25; --muted:#5D7057; --line:#DDE6DD; --card:#FFFFFF;
+    --red:#B85042; --redbg:#FBEDE9;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--beige); color:var(--ink);
+    font-family:"Poppins","Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5; font-size:15px;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:28px 22px 80px}
+  h1,h2,h3{margin:0 0 .4em; line-height:1.2; font-weight:700; color:var(--dark)}
+  h2{font-size:22px; margin-top:8px}
+  h3{font-size:16px}
+  p{margin:0 0 .8em}
+  a{color:var(--green)}
+  .small{font-size:12.5px; color:var(--muted)}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--green); margin-bottom:6px}
+
+  /* toolbar */
+  .bar{position:sticky; top:0; z-index:10; display:flex; justify-content:space-between; align-items:center;
+       background:var(--dark); color:#fff; padding:10px 16px; border-radius:12px; margin-bottom:22px}
+  .bar .brand{font-weight:700; letter-spacing:.02em}
+  .btn{background:var(--lime); color:var(--dark); border:none; font-weight:700; font-size:13px;
+       padding:9px 16px; border-radius:999px; cursor:pointer; font-family:inherit}
+  .btn:hover{filter:brightness(.96)}
+
+  /* cover */
+  .cover{background:var(--dark); color:#fff; border-radius:18px; padding:34px 30px; margin-bottom:26px}
+  .cover h1{color:#fff; font-size:34px; margin-bottom:.25em}
+  .cover .sub{color:#cfeede; font-size:16px; max-width:640px}
+  .metarow{display:flex; flex-wrap:wrap; gap:10px 26px; margin-top:20px; font-size:13px; color:#bfe0cf}
+  .metarow b{color:#fff; font-weight:600}
+
+  /* campaign header */
+  .camphead{display:flex; align-items:center; gap:12px; margin:34px 0 14px}
+  .camphead .num{background:var(--green); color:#fff; font-weight:700; border-radius:10px; padding:6px 12px; font-size:14px}
+  .camphead h2{margin:0}
+
+  /* cards */
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin:14px 0}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px}
+  .card .lab{font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600}
+  .card .val{font-size:24px; font-weight:700; color:var(--dark); margin-top:3px}
+  .card .note{font-size:12px; color:var(--muted); margin-top:2px}
+
+  .callout{background:#eaf5ee; border-left:4px solid var(--green); border-radius:10px; padding:12px 16px; margin:12px 0}
+  .callout.warn{background:var(--redbg); border-left-color:var(--red)}
+  .callout h3{color:var(--dark); margin-bottom:.2em}
+
+  .section{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin:16px 0}
+
+  table{width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{background:#eef4ee; color:var(--dark); font-weight:600; font-size:12.5px; text-transform:uppercase; letter-spacing:.03em}
+  .pill{display:inline-block; background:var(--lime); color:var(--dark); border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600}
+  .badge{display:inline-block; border-radius:999px; padding:3px 12px; font-size:12px; font-weight:700}
+  .badge.healthy{background:#dff5e7; color:#0b6b46}
+  .badge.watch{background:#fff2d6; color:#8a6100}
+  .badge.thin{background:var(--redbg); color:var(--red)}
+
+  ul{margin:.3em 0 .9em; padding-left:20px}
+  li{margin:.25em 0}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .two h3{color:var(--green)}
+  .flow{background:#f7faf7; border:1px dashed var(--line); border-radius:14px; padding:14px; margin:12px 0; overflow-x:auto}
+  .check li{list-style:none; margin-left:-16px}
+  .check li::before{content:"☐"; color:var(--green); font-weight:700; margin-right:8px}
+
+  .footer{background:var(--dark); color:#fff; border-radius:16px; padding:24px 26px; margin-top:30px}
+  .footer h2{color:#fff}
+  .footer a{color:var(--lime)}
+  .disclaimer{font-size:12px; color:var(--muted); margin-top:10px}
+
+  @media (max-width:640px){ .two{grid-template-columns:1fr} .cover h1{font-size:26px} }
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+    .wrap{max-width:none; padding:0}
+    .section,.card,.cover,.footer{break-inside:avoid}
+    h2{break-after:avoid}
+    .campaign{break-before:page}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar no-print">
+    <span class="brand">ZenABM · ABM Strategy</span>
+    <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+  </div>
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="eyebrow" style="color:var(--lime)">ZenABM · LinkedIn ABM Strategy</div>
+    <h1>{{COMPANY_NAME}} LinkedIn ABM Strategy</h1>
+    <p class="sub">{{ONE_LINE_TAGLINE}}</p>
+    <div class="metarow">
+      <span><b>Website:</b> {{WEBSITE}}</span>
+      <span><b>Prepared:</b> {{CAMPAIGN_DATE}}</span>
+      <span><b>Markets / audiences:</b> {{AUDIENCE_LIST}}</span>
+      <span><b>By:</b> ZenABM</span>
+    </div>
+  </div>
+
+  <!-- ============ CAMPAIGN:START (duplicate per audience) ============ -->
+  <div class="campaign">
+    <div class="camphead">
+      <span class="num">Campaign {{N}}</span>
+      <h2>{{AUDIENCE_NAME}}</h2>
+    </div>
+
+    <!-- Header block -->
+    <div class="section">
+      <div class="grid">
+        <div class="card"><div class="lab">Company</div><div class="val" style="font-size:18px">{{COMPANY_NAME}}</div></div>
+        <div class="card"><div class="lab">Target audience (ICP)</div><div class="val" style="font-size:16px">{{ICP_SUMMARY}}</div></div>
+        <div class="card"><div class="lab">Campaign date</div><div class="val" style="font-size:16px">{{CAMPAIGN_DATE}}</div></div>
+      </div>
+      <p class="small"><b>About {{COMPANY_NAME}}:</b> {{COMPANY_RESEARCH_SUMMARY}}
+        <br><b>Main use cases:</b> {{USE_CASES}} · <b>Personas:</b> {{PERSONAS}}</p>
+    </div>
+
+    <!-- Campaign Goals -->
+    <h2>Campaign goals</h2>
+    <div class="grid">
+      <div class="card"><div class="lab">ABM revenue goal</div><div class="val">{{REVENUE_GOAL}}</div><div class="note">{{REVENUE_BASIS}}</div></div>
+      <div class="card"><div class="lab">Deals needed</div><div class="val">{{DEALS_NEEDED}}</div><div class="note">to hit the goal</div></div>
+      <div class="card"><div class="lab">Clicks needed</div><div class="val">{{CLICKS_NEEDED}}</div><div class="note">{{DEMOS_NEEDED}} demos → clicks</div></div>
+      <div class="card"><div class="lab">Audience size needed</div><div class="val">{{AUDIENCE_NEEDED}}</div><div class="note">{{ACCOUNTS_NEEDED}} accounts</div></div>
+      <div class="card"><div class="lab">Budget needed</div><div class="val">{{MONTHLY_BUDGET_REQ}}/mo</div><div class="note">{{ANNUAL_BUDGET}}/yr · ROAS {{ROAS}}× · ${{PIPELINE_PER_DOLLAR}} pipeline/$</div></div>
+      <div class="card"><div class="lab">Time to run</div><div class="val">{{TIME_TO_RUN}}</div><div class="note">at your {{STATED_MONTHLY_BUDGET}}/mo budget</div></div>
+    </div>
+    <div class="callout">
+      <h3>The deal math</h3>
+      <p class="small">{{DEAL_MATH_SENTENCE}}<br>
+      Goal {{REVENUE_GOAL}} ÷ ACV {{ACV}} = {{DEALS_NEEDED}} deals → ÷ {{CLOSE_RATE}} close ÷ {{QUAL_RATE}} qualify
+      = {{DEMOS_NEEDED}} demos → ÷ {{LP_CVR}} landing-page conversion = {{CLICKS_NEEDED}} clicks →
+      × {{CPC}} CPC = {{ANNUAL_BUDGET}}/yr.</p>
+    </div>
+
+    <!-- Campaign Structure -->
+    <h2>Campaign structure</h2>
+    <div class="grid">
+      <div class="card"><div class="lab">ABM campaigns to run</div><div class="val">{{NUM_CAMPAIGNS}}</div><div class="note">1 audience = 1 campaign</div></div>
+      <div class="card"><div class="lab">Ads you can run at once</div><div class="val">{{MAX_ADS}}</div><div class="note">click-driving ads · {{CLICKS_PER_AD_DAY}} clicks/ad/day</div></div>
+      <div class="card"><div class="lab">Delivery health</div><div class="val"><span class="badge {{HEALTH_CLASS}}">{{HEALTH_LABEL}}</span></div><div class="note">${{PER_AD_DAILY}}/ad/day</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Format</th><th>How many</th><th>Ad-set objective</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><b>Thought Leader (TLA)</b></td><td>{{N_TLA}}</td><td>Website Visits</td><td>Best value; from a person's profile</td></tr>
+        <tr><td><b>Image ads</b></td><td>{{N_IMAGE}}</td><td>Engagement</td><td>Reach workhorse</td></tr>
+        <tr><td><b>Text ads</b></td><td>{{N_TEXT}}</td><td>Website Visits</td><td>Set-CPC, ~free — always include</td></tr>
+        <tr><td><b>Video ads</b></td><td>{{N_VIDEO}}</td><td>Website Visits</td><td>Warm / nurture, 15–30s</td></tr>
+        <tr><td><b>Document / Carousel</b></td><td>{{N_DOC}}</td><td>Brand Awareness</td><td>Storytelling / lead magnet</td></tr>
+      </tbody>
+    </table>
+    <p class="small">{{ALLOCATION_NOTE}}</p>
+
+    <div class="flow">
+      <div class="eyebrow">Ad structure</div>
+      <pre class="mermaid">
+graph LR
+  C["Campaign {{N}}: {{AUDIENCE_NAME}}"]
+  C --> T["TLA ad set<br/>{{N_TLA}} ads · Website Visits"]
+  C --> I["Image ad set<br/>{{N_IMAGE}} ads · Engagement"]
+  C --> X["Text ad set<br/>{{N_TEXT}} ads · Website Visits"]
+  C --> V["Video ad set<br/>{{N_VIDEO}} ads · Website Visits"]
+  C --> D["Doc/Carousel ad set<br/>{{N_DOC}} ad · Brand Awareness"]
+      </pre>
+    </div>
+
+    <!-- Campaign Content -->
+    <h2>Campaign content</h2>
+    <p class="small">Each ad maps to a job-to-be-done for {{AUDIENCE_NAME}}. Draft to the format best practices below.</p>
+    <table>
+      <thead><tr><th>#</th><th>Format</th><th>Angle / job-to-be-done</th><th>Draft message</th></tr></thead>
+      <tbody>
+        {{AD_CONTENT_ROWS}}
+        <!-- e.g. <tr><td>1</td><td>TLA</td><td>Speed-to-lead</td><td>"I lost a deal because we called back 20 minutes late…"</td></tr> -->
+      </tbody>
+    </table>
+  </div>
+  <!-- ============ CAMPAIGN:END ============ -->
+
+  <!-- ===================== SHARED SECTIONS (once) ===================== -->
+
+  <h2 style="margin-top:36px">Ad-format best practices</h2>
+  <p class="small">From ZenABM's 2026 LinkedIn ABM Benchmarks Report (2,828 B2B SaaS ads). Winners share a specific
+    offer + real people + an unmissable CTA. Lead with TLAs — ~77% cheaper per click than image ads.</p>
+
+  <div class="section">
+    <div class="two">
+      <div>
+        <h3>Image ads — CTR 0.42% · CPC $13.23</h3>
+        <p class="small"><b>Do:</b> a specific offer (FREE/$/deadline); real people with names, not stock; one bold high-contrast CTA; mobile-first, uncluttered.<br>
+        <b>Avoid:</b> logo/stock as hero; text-heavy UI dumps; vague "Learn More".</p>
+      </div>
+      <div>
+        <h3>Thought Leader Ads — CTR 2.68% · CPC $3.06</h3>
+        <p class="small"><b>Do:</b> 1st-person ("I…"); open with a pain point; link in the bottom 25%; 1,000–1,500 chars, specific metrics, different credible authors.<br>
+        <b>Avoid:</b> corporate "we"; link mid-post; hashtag spam; the same post across personas.</p>
+      </div>
+      <div>
+        <h3>Video ads — CTR 0.24% · CPC $15.61</h3>
+        <p class="small"><b>Do:</b> hook in 3s; under 30s; your own captions; a named SME; use for warm/retargeting.<br>
+        <b>Avoid:</b> cold-click reliance; over-funding vs TLAs; long intros.</p>
+      </div>
+      <div>
+        <h3>Text ads — set-CPC, cheap reach</h3>
+        <p class="small"><b>Do:</b> punchy headline + one CTA; an emoji to break the sidebar pattern; test variants; always-on.<br>
+        <b>Avoid:</b> expecting volume; giving them a click budget.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>Campaign launch best practices</h2>
+  <div class="section">
+    <p class="small"><b>Objectives:</b> TLA / text / video → Website Visits · image → Engagement · document / carousel (and any grouped TLA+image set) → Brand Awareness.</p>
+    <p class="small"><b>Prune early:</b> once an ad passes <b>1,000 impressions</b>, judge it on CTR vs its format benchmark and pause underperformers.</p>
+    <table>
+      <thead><tr><th>Format</th><th>Median CTR</th><th>Pause if below (after 1,000+ impressions)</th></tr></thead>
+      <tbody>
+        <tr><td>TLA</td><td>2.68%</td><td>~1.8%</td></tr>
+        <tr><td>Image</td><td>0.42%</td><td>~0.30%</td></tr>
+        <tr><td>Carousel</td><td>0.49%</td><td>~0.32%</td></tr>
+        <tr><td>Video</td><td>0.24%</td><td>~0.16%</td></tr>
+      </tbody>
+    </table>
+    <p class="small">Full benchmarks: <a href="https://zenabm.com/linkedin-abm-benchmarks-report">zenabm.com/linkedin-abm-benchmarks-report</a></p>
+  </div>
+
+  <h2>Campaign performance tracking</h2>
+  <div class="section">
+    <ul>
+      <li><b>Set account scoring / ABM stages</b> in ZenABM and sync them to your CRM.</li>
+      <li><b>Monitor account progression:</b> identified → interested → considering → selecting; route warm, high-intent accounts to BDRs/AEs.</li>
+      <li><b>Watch leading metrics with Zena</b> (the ZenABM AI agent): effective CTR to the landing page and landing-page clicks/month, <b>per ad-set and per inventory type</b>, vs. benchmarks.</li>
+      <li><b>Spend pacing:</b> on track vs the monthly budget and the time-to-run estimate.</li>
+      <li><b>Secondary metrics:</b> website conversion rate, deal open rate, pipeline per $ spent, goal-completion rate.</li>
+    </ul>
+  </div>
+
+  <h2>Before you launch — checklist</h2>
+  <div class="section">
+    <ul class="check">
+      {{CHECKLIST_ITEMS}}
+      <!-- render checklist.md items as <li>…</li> -->
+    </ul>
+  </div>
+
+  <div class="footer">
+    <h2>Ready to launch and track it?</h2>
+    <p>Start a <b>free 37-day ZenABM trial</b> (no credit card) to build your audience, score accounts and track every ad by company:
+      <a href="https://app.zenabm.com/signup">app.zenabm.com/signup</a>.
+      Connect the ZenABM MCP for live LinkedIn data: <a href="https://app.zenabm.com/api/mcp">app.zenabm.com/api/mcp</a>.</p>
+    <p class="disclaimer" style="color:#9dc3ad">These are directional planning figures based on your inputs and standard ZenABM benchmarks — not a precise forecast. Actual results depend on creative, targeting and follow-up.</p>
+  </div>
+
+</div>
+<script>
+  if (window.mermaid) { mermaid.initialize({ startOnLoad:true, theme:"base",
+    themeVariables:{ primaryColor:"#eaf5ee", primaryTextColor:"#1E2B25", primaryBorderColor:"#0F8A5F",
+      lineColor:"#5D7057", fontFamily:"Poppins, system-ui, sans-serif" } });
+  }
+</script>
+</body>
+</html>

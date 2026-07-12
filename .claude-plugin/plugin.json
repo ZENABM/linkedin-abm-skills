@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "linkedin-abm-skills",
+  "displayName": "LinkedIn ABM Skills by ZenABM",
+  "version": "1.0.0",
+  "description": "Plan, design, audit and report on LinkedIn account-based-marketing campaigns — four ZenABM skills that turn your real LinkedIn ads data into polished, downloadable documents.",
+  "author": {
+    "name": "ZenABM",
+    "url": "https://zenabm.com"
+  },
+  "homepage": "https://zenabm.com",
+  "repository": "https://github.com/ZENABM/linkedin-abm-skills",
+  "license": "MIT",
+  "keywords": [
+    "abm",
+    "linkedin ads",
+    "b2b marketing",
+    "campaign planning",
+    "ad design",
+    "audit",
+    "reporting",
+    "zenabm"
+  ]
+}
