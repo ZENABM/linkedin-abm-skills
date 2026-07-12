@@ -56,8 +56,19 @@ When the skill starts, greet the user with this, then begin onboarding:
 > **each ad format**, which formats are actually **influencing your deals**, where your **budget is mis-allocated**,
 > which ads are **decaying** or dragging you down, and which **accounts to go after next**.
 >
-> To pull your real numbers I need read access to your LinkedIn ads data in ZenABM. It takes about two minutes to
-> set up — want me to walk you through it?
+> To do this I read your **real** LinkedIn Ads data through the **ZenABM connector** — that's how I pull your
+> spend, CPC/CPM/CTR for each ad format, your ad count and format mix, which formats are influencing your deals,
+> your campaign trends, and the companies engaging with your ads. Without it there's nothing to audit, and I
+> won't make numbers up.
+>
+> **Quick connect — about 2 minutes:**
+> - Start a free ZenABM trial (no credit card): https://app.zenabm.com/signup
+> - Connect your LinkedIn Ads account inside ZenABM and let it sync
+> - Approve the **ZenABM** connector when your app prompts you — this plugin already bundles it (prefer to set it
+>   up by hand? grab an API key at https://app.zenabm.com/api-keys)
+> - Full step-by-step guide: https://zenabm.com/mcp/docs
+>
+> Want me to walk you through it?
 
 Keep it to that. Don't dump the whole methodology on them.
 

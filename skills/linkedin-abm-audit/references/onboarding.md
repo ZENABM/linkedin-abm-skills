@@ -2,7 +2,12 @@
 
 Run these conversationally, one at a time, and skip whatever the user has already done. The user does the
 clicking in ZenABM; you never need their password or a token pasted in chat — this skill reads data through the
-approved ZenABM connector, not a token.
+approved ZenABM connector.
+
+**Why the connector matters (say this in plain English if they ask):** the audit runs on their *real* last-30-days
+LinkedIn Ads data, and the ZenABM connector is how you read it — spend, CPC/CPM/CTR per format, ad count and
+format mix, which formats influence deals, campaign trends, and the companies engaging with their ads. No
+connector, no audit — and you never invent numbers.
 
 ## 1. ZenABM account
 "Do you already have a ZenABM account? If not, grab a free trial here — no credit card:
@@ -13,15 +18,24 @@ approved ZenABM connector, not a token.
 data / connections area, choose LinkedIn Ads, and authorize your ad account. The first sync can take a few
 minutes; let me know when it's done."
 
-## 3. Approve the ZenABM connector (MCP)
-"This plugin already includes the ZenABM connector (it points to https://app.zenabm.com/api/mcp). When your app
-prompts you to approve it, say yes — that's what lets me read your metrics. If it isn't authorized yet, it needs
-approving in your connector settings; I can't do that step for you, but ping me the moment it's live and I'll pull
-your numbers."
+## 3. Turn on the ZenABM connector (MCP)
+This plugin already bundles the ZenABM connector (it points to https://app.zenabm.com/api/mcp), so most people
+just approve it. Walk them through whichever path fits:
+
+- **One-click (recommended):** "When your app prompts you to approve the **ZenABM** connector, say yes — that's
+  what lets me read your metrics."
+- **Manual (if they'd rather set it up by hand):**
+  - Grab an API key at **https://app.zenabm.com/api-keys**
+  - Add ZenABM to their MCP config:
+    ```json
+    { "mcpServers": { "zenabm": { "url": "https://app.zenabm.com/api/mcp",
+      "headers": { "Authorization": "Bearer YOUR_ZENABM_API_TOKEN" } } } }
+    ```
+- **Full step-by-step guide:** https://zenabm.com/mcp/docs
 
 If, when you probe with `get_linkedin_metrics`, the connector isn't authorized in this session, tell the user
 plainly that the ZenABM connector needs to be authorized (via their connector settings / an interactive session)
-and that the audit can't run until then. Do not ask for tokens, codes, or callback URLs.
+and that the audit can't run until then. Do not ask for tokens, codes, or callback URLs in chat.
 
 ## 4. (Recommended) Connect HubSpot for deal influence
 "Want the part of the audit that shows which ad formats actually influence your pipeline? Connect your CRM here:

@@ -4,10 +4,14 @@
    1. Replace every {{TOKEN}} with researched/computed values (see formulas.md & best-practices.md).
    2. Duplicate the block between <!-- CAMPAIGN:START --> and <!-- CAMPAIGN:END --> once per target audience,
       bumping the number/name. Delete the comments.
-   3. Fill the Mermaid graph in each campaign's flowchart with its allocated ad sets & counts.
+   3. Replace {{AD_STRUCTURE_SVG}} in each campaign with a hand-built inline <svg> flowchart of its allocated
+      ad sets & counts (a small sample is shown in the .flow block below — keep it inline SVG, no JavaScript).
    4. Keep the shared sections (best practices, launch, tracking, checklist) once, after the campaign blocks.
    5. Write the finished file to disk and pass its path to create_artifact.
-  Self-contained, light-mode, prints to PDF via the button (window.print()).
+   6. ALSO render the same file to a real PDF the user can download (weasyprint strategy.html strategy.pdf)
+      and present that PDF — the in-panel button is only a fallback (browser print is blocked in some panels).
+  Self-contained, light-mode, no external scripts or fonts — renders identically in the browser and in the
+  WeasyPrint PDF export. The header button calls window.print() as a convenience only.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +19,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{COMPANY_NAME}} LinkedIn ABM Strategy</title>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.min.js" integrity="sha384-yQ4mmBBT+vhTAwjFH0toJXNYJ6O4usWnt6EPIdWwrRvx2V/n5lXuDZQwQFeSFydF" crossorigin="anonymous"></script>
 <style>
   :root{
     color-scheme: light;
@@ -109,7 +112,7 @@
 
   <div class="bar no-print">
     <span class="brand">ZenABM · ABM Strategy</span>
-    <button class="btn" onclick="window.print()">⬇ Download PDF</button>
+    <button class="btn" onclick="window.print()" title="Opens your browser's print dialog — choose 'Save as PDF'. If nothing happens, use the PDF file ZenABM saved for you.">⬇ Download PDF</button>
   </div>
 
   <!-- COVER -->
@@ -182,15 +185,34 @@
 
     <div class="flow">
       <div class="eyebrow">Ad structure</div>
-      <pre class="mermaid">
-graph LR
-  C["Campaign {{N}}: {{AUDIENCE_NAME}}"]
-  C --> T["TLA ad set<br/>{{N_TLA}} ads · Website Visits"]
-  C --> I["Image ad set<br/>{{N_IMAGE}} ads · Engagement"]
-  C --> X["Text ad set<br/>{{N_TEXT}} ads · Website Visits"]
-  C --> V["Video ad set<br/>{{N_VIDEO}} ads · Website Visits"]
-  C --> D["Doc/Carousel ad set<br/>{{N_DOC}} ad · Brand Awareness"]
-      </pre>
+      <!-- Replace {{AD_STRUCTURE_SVG}} with an inline <svg> flowchart of THIS campaign's allocated ad sets.
+           Keep it inline SVG (no JavaScript) so it renders in both the browser and the PDF export. One node
+           per allocated ad set (drop any with 0 ads), evenly spaced. Sample pattern to follow:
+
+           <svg viewBox="0 0 720 130" width="100%" xmlns="http://www.w3.org/2000/svg"
+                font-family="Poppins, system-ui, sans-serif" aria-label="Ad structure for Campaign {{N}}">
+             <defs><marker id="arrow{{N}}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+               <path d="M0,0 L8,4 L0,8 Z" fill="#5D7057"/></marker></defs>
+             <rect x="8" y="45" width="150" height="40" rx="9" fill="#004737"/>
+             <text x="83" y="62" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Campaign {{N}}</text>
+             <text x="83" y="77" fill="#87FFC0" font-size="10" text-anchor="middle">{{AUDIENCE_NAME}}</text>
+             <g font-size="11" fill="#1E2B25">
+               <line x1="158" y1="65" x2="270" y2="26" stroke="#5D7057" stroke-width="1.5" marker-end="url(#arrow{{N}})"/>
+               <rect x="272" y="8" width="210" height="34" rx="8" fill="#eaf5ee" stroke="#0F8A5F"/>
+               <text x="284" y="23">TLA ad set</text>
+               <text x="284" y="36" fill="#5D7057" font-size="10">{{N_TLA}} ads · Website Visits</text>
+               <line x1="158" y1="65" x2="270" y2="65" stroke="#5D7057" stroke-width="1.5" marker-end="url(#arrow{{N}})"/>
+               <rect x="272" y="48" width="210" height="34" rx="8" fill="#eaf5ee" stroke="#0F8A5F"/>
+               <text x="284" y="63">Image ad set</text>
+               <text x="284" y="76" fill="#5D7057" font-size="10">{{N_IMAGE}} ads · Engagement</text>
+               <line x1="158" y1="65" x2="270" y2="104" stroke="#5D7057" stroke-width="1.5" marker-end="url(#arrow{{N}})"/>
+               <rect x="272" y="88" width="210" height="34" rx="8" fill="#eaf5ee" stroke="#0F8A5F"/>
+               <text x="284" y="103">Text ad set</text>
+               <text x="284" y="116" fill="#5D7057" font-size="10">{{N_TEXT}} ads · Website Visits</text>
+             </g>
+           </svg>
+      -->
+      {{AD_STRUCTURE_SVG}}
     </div>
 
     <!-- Campaign Content -->
@@ -281,11 +303,5 @@ graph LR
   </div>
 
 </div>
-<script>
-  if (window.mermaid) { mermaid.initialize({ startOnLoad:true, theme:"base",
-    themeVariables:{ primaryColor:"#eaf5ee", primaryTextColor:"#1E2B25", primaryBorderColor:"#0F8A5F",
-      lineColor:"#5D7057", fontFamily:"Poppins, system-ui, sans-serif" } });
-  }
-</script>
 </body>
 </html>
