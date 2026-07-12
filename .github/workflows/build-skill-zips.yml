@@ -1,0 +1,59 @@
+name: Build skill zips
+
+# Rebuild one <skill>.zip per folder under skills/ and refresh the assets on the
+# rolling "v1" release whenever skill content lands on main. Each archive keeps the
+# skill folder at its top level (e.g. abm-strategy-planning/...) so it installs
+# directly as a Claude skill.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.github/workflows/build-skill-zips.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-skill-zips
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Build one zip per skill
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          shopt -s nullglob
+          for dir in skills/*/; do
+            name="$(basename "$dir")"
+            # zip from inside skills/ so the archive contains "<name>/..." at the top.
+            # -X drops extra file attributes for reproducible archives.
+            ( cd skills && zip -r -X "../dist/${name}.zip" "$name" \
+                -x '*/.DS_Store' '*/__MACOSX/*' )
+            echo "built dist/${name}.zip"
+          done
+          ls -l dist
+
+      - name: Refresh assets on the rolling v1 release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Self-heal: create the v1 release if it has been deleted.
+          if ! gh release view v1 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create v1 \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "LinkedIn ABM Skills — download & install" \
+              --notes "Skill packages, rebuilt automatically on every push to main." \
+              --target "$GITHUB_SHA"
+          fi
+          # --clobber replaces the existing same-named assets in place.
+          gh release upload v1 dist/*.zip --clobber --repo "$GITHUB_REPOSITORY"
