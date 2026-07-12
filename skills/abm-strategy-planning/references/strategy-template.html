@@ -172,13 +172,19 @@
       <div class="card"><div class="lab">Delivery health</div><div class="val"><span class="badge {{HEALTH_CLASS}}">{{HEALTH_LABEL}}</span></div><div class="note">${{PER_AD_DAILY}}/ad/day</div></div>
     </div>
     <table>
-      <thead><tr><th>Format</th><th>How many</th><th>Ad-set objective</th><th>Notes</th></tr></thead>
+      <thead><tr>
+        <th>Format</th><th>How many</th>
+        <th>Your budget<br><span style="font-weight:400;text-transform:none">{{STATED_MONTHLY_BUDGET}}/mo</span></th>
+        <th>Recommended<br><span style="font-weight:400;text-transform:none">{{MONTHLY_BUDGET_REQ}}/mo to hit goal</span></th>
+        <th>Ad-set objective</th><th>Notes</th>
+      </tr></thead>
       <tbody>
-        <tr><td><b>Thought Leader (TLA)</b></td><td>{{N_TLA}}</td><td>Website Visits</td><td>Best value; from a person's profile</td></tr>
-        <tr><td><b>Image ads</b></td><td>{{N_IMAGE}}</td><td>Engagement</td><td>Reach workhorse</td></tr>
-        <tr><td><b>Text ads</b></td><td>{{N_TEXT}}</td><td>Website Visits</td><td>Set-CPC, ~free — always include</td></tr>
-        <tr><td><b>Video ads</b></td><td>{{N_VIDEO}}</td><td>Website Visits</td><td>Warm / nurture, 15–30s</td></tr>
-        <tr><td><b>Document / Carousel</b></td><td>{{N_DOC}}</td><td>Brand Awareness</td><td>Storytelling / lead magnet</td></tr>
+        <tr><td><b>Thought Leader (TLA)</b></td><td>{{N_TLA}}</td><td>{{BUD_TLA}}</td><td>{{BUD_REC_TLA}}</td><td>Website Visits</td><td>Best value; from a person's profile</td></tr>
+        <tr><td><b>Image ads</b></td><td>{{N_IMAGE}}</td><td>{{BUD_IMAGE}}</td><td>{{BUD_REC_IMAGE}}</td><td>Engagement</td><td>Reach workhorse</td></tr>
+        <tr><td><b>Text ads</b></td><td>{{N_TEXT}}</td><td>{{BUD_TEXT}}</td><td>{{BUD_REC_TEXT}}</td><td>Website Visits</td><td>Set-CPC, ~free — always include</td></tr>
+        <tr><td><b>Video ads</b></td><td>{{N_VIDEO}}</td><td>{{BUD_VIDEO}}</td><td>{{BUD_REC_VIDEO}}</td><td>Website Visits</td><td>Warm / nurture, 15–30s</td></tr>
+        <tr><td><b>Document / Carousel</b></td><td>{{N_DOC}}</td><td>{{BUD_DOC}}</td><td>{{BUD_REC_DOC}}</td><td>Brand Awareness</td><td>Storytelling / lead magnet</td></tr>
+        <tr style="font-weight:700;background:#eef4ee"><td>Total (click-driving)</td><td>{{MAX_ADS}}</td><td>{{STATED_MONTHLY_BUDGET}}/mo</td><td>{{MONTHLY_BUDGET_REQ}}/mo</td><td>—</td><td>Text runs on a separate set-CPC bid</td></tr>
       </tbody>
     </table>
     <p class="small">{{ALLOCATION_NOTE}}</p>

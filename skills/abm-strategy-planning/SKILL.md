@@ -1,5 +1,6 @@
 ---
 name: abm-strategy-planning
+version: 3.0.0
 description: >
   Generate a personalized, downloadable LinkedIn ABM Strategy for a company from a short interview.
   Use when someone wants an ABM strategy, an ABM plan, a LinkedIn ABM campaign plan, help planning
@@ -85,6 +86,9 @@ LinkedIn ad-count calculator, verified to the dollar). Per audience/campaign com
 - **Affordable simultaneous ads** from the ad-count model, then the **format allocation** (TLA / image / text /
   video / doc-carousel) using the allocation rules in `formulas.md`, including the objective per ad set and the
   "group TLA + image under Brand Awareness if you can't afford 10" fallback.
+- **Budget allocation per ad set** (see `formulas.md`): for every click-driving format, the **% of spend** and the
+  **$/mo** at *both* the user's stated budget and the recommended `monthlyBudgetReq`. Text ads are ~$0 (separate
+  set-CPC bid). These fill the two budget columns in the Campaign Structure table.
 
 Show the key computed numbers to the user before building, so they can sanity-check.
 
@@ -116,7 +120,8 @@ Per audience, a **Campaign N** block, then the shared sections:
 - **Campaign Goals** — ABM revenue goal · deals needed · clicks needed · audience size + accounts needed · budget
   needed · the deal math · time to run (actual budget ÷ stated monthly budget).
 - **Campaign Structure** — number of ABM campaigns (audiences) · affordable ads at a time · which formats · counts
-  per format (TLA/image/text/video/doc-carousel) with the right ad-set objective · **ad-structure flowchart**.
+  per format (TLA/image/text/video/doc-carousel) with the right ad-set objective · **per-ad-set budget allocation
+  (% + $/mo, at both the user's budget and the recommended budget)** · **ad-structure flowchart**.
 - **Campaign Content** — the content of each ad, mapped to the ICP and the top jobs-to-be-done / use cases.
 - **Ad-format best practices** — image, TLA, video, text (from `references/best-practices.md`).
 - **Campaign launch best practices** — objectives; pause underperforming ads after 1,000+ impressions by CTR
